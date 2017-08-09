@@ -1,4 +1,5 @@
 import json
+from time import sleep
 
 import requests
 
@@ -47,24 +48,35 @@ class GStalker(object):
         else:
             print('bad status code: {}'.format(vals.status_code))
 
+    def parse_event_page(self, res):
+        commits = []
+        if res is not None:
+            res_json = res.json()
+            pushes = [_ for _ in res_json if _['type'] == 'PushEvent']
+            for commit in pushes[0]['payload']['commits']:
+                commits.append({'repo': pushes[0]['repo']['url'], 'sha': commit['sha']})
+        return commits
+
+    def validate_commit(self, payload):
+        files_changed = [_['filename'].lower() for _ in payload['files']]
+        for item in files_changed:
+            if item in ['requirements.txt', 'package.json']:
+                print('Found an item: {}'.format(item))
+
+    def get_new_commits_by_file(self):
+        for i in range(0, 10):
+            events = self.get_events(page=i)
+            if events is not None:
+                commits = self.parse_event_page(events)
+                for commit in commits:
+                    commit_metadata = self.get_commit(commit['repo'], commit['sha'])
+                    self.validate_commit(commit_metadata)
+                    sleep(0.5)
+
 
 def main():
-    etag = None
-
     grabber = GStalker()
-
-    event_url = 'https://api.github.com/events'
-    for i in range(0, 5):
-        objs = grabber.get_events(event_url, etag)
-        etag = objs.headers['Etag']
-        if objs is not None:
-            thing = objs.json()
-            print('Got: {}'.format(len(thing)))
-            pushes = [_ for _ in thing if _['type'] == 'PushEvent']
-            for commit in pushes[0]['payload']['commits']:
-                repo = pushes[0]['repo']['url']
-                sha = commit['sha']
-                grabber.get_commit(repo, sha)
+    grabber.get_new_commits_by_file()
 
 
 if __name__ == '__main__':
