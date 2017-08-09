@@ -8,13 +8,14 @@ class GStalker(object):
     def __init__(self):
         self.load_config('../config/config.json')
         self.etag = None
+        self.event_url = 'https://api.github.com/events'
 
     def load_config(self, tgt_file):
         """Load the github auth data."""
         with open(tgt_file, 'r') as infile:
             self.config = json.load(infile)
 
-    def get_events(self, url, page=None):
+    def get_events(self, page=None):
         """Get the events stream from this URL, there are many pages but in general it seems we only get a few
         we cannot handle the entire GitHub stream."""
 
@@ -24,7 +25,7 @@ class GStalker(object):
             headers = {'Etag': '\'{}\''.format(self.etag)}
         else:
             headers = {}
-        url = '{}?page={}'.format(url, page)
+        url = '{}?page={}'.format(self.event_url, page)
         obj = requests.get(url, headers=headers, auth=(self.config['user'], self.config['pass']))
         if obj.status_code == 200:
             print('returning obj')
@@ -41,8 +42,8 @@ class GStalker(object):
         vals = requests.get(url)
         if vals.status_code == 200:
             payload = vals.json()
-            files_changed = [_['filename'] for _ in payload['files']]
-            print(files_changed)
+            return payload
+            # print(files_changed)
         else:
             print('bad status code: {}'.format(vals.status_code))
 
