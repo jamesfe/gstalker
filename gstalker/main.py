@@ -7,23 +7,35 @@ import requests
 
 class GStalker(object):
 
-    def make_request(self, url, headers, auth):
+    def make_request(self, url, headers=None, auth=None):
         """Make a request but also keep our rates down."""
+        if headers is None:
+            headers = {}
         if self.remaining_requests > 0:
-            if headers is None:
-                headers = {}
             res = requests.get(url, headers=headers, auth=auth)
             self.remining_requests = res.headers['X-RateLimit-Remaining']
             self.reset_time = res.headers['X-RateLimit-Reset']
-        else:
+            return res
+        elif self.remaining_requests <= 0:
+            res = requests.get(url, headers=headers, auth=auth)
+            if 'X-RateLimit-Reset' not in res.headers:
+                print('Not receiving rate limit reset in headers, returning None.')
+                return None
+        elif self.reset_time is not None:
             seconds_to_wait = self.reset_time - time()
             print('Sleeping for {} seconds, rate limits too low.'.format(seconds_to_wait))
             sleep(seconds_to_wait)
-            self.make_request(url, headers, auth)
-        return res
+            res = self.make_request(url, headers, auth)
+        else:
+            print('No requests left.')
+            return None
 
-    def __init__(self):
-        self.load_config('../config/config.json')
+    def __init__(self, config_path=None):
+        if config_path is None:
+            self.config_path = '../config/config.json'
+        else:
+            self.config_path = config_path
+        self.load_config(self.config_path)
         self.etag = None
         self.event_url = 'https://api.github.com/events'
         self.remaining_requests = 50
