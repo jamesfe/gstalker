@@ -32,7 +32,7 @@ class GStalker(object):
 
     def __init__(self, config_path=None):
         if config_path is None:
-            self.config_path = '../config/config.json'
+            self.config_path = './config/config.json'
         else:
             self.config_path = config_path
         self.load_config(self.config_path)
@@ -60,7 +60,6 @@ class GStalker(object):
         url = '{}?page={}'.format(self.event_url, page)
         obj = self.make_request(url, headers=headers, auth=self.auth)
         if obj.status_code == 200:
-            print('returning obj')
             if 'Etag' in obj.headers:
                 self.etag = obj.headers['Etag']
             return obj
@@ -70,12 +69,11 @@ class GStalker(object):
 
     def get_commit(self, repo, sha):
         url = '{}/commits/{}'.format(repo, sha)
-        print(url)
+        print('Checking Commit: ', url)
         vals = self.make_request(url)
         if vals.status_code == 200:
             payload = vals.json()
             return payload
-            # print(files_changed)
         else:
             print('bad status code: {}'.format(vals.status_code))
 
