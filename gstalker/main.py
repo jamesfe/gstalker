@@ -1,15 +1,34 @@
 import json
-from time import sleep
+from time import sleep, time
+from datetime import datetime as dt
 
 import requests
 
 
 class GStalker(object):
 
+    def make_request(self, url, headers, auth):
+        """Make a request but also keep our rates down."""
+        if self.remaining_requests > 0:
+            if headers is None:
+                headers = {}
+            res = requests.get(url, headers=headers, auth=auth)
+            self.remining_requests = res.headers['X-RateLimit-Remaining']
+            self.reset_time = res.headers['X-RateLimit-Reset']
+        else:
+            seconds_to_wait = self.reset_time - time()
+            print('Sleeping for {} seconds, rate limits too low.'.format(seconds_to_wait))
+            sleep(seconds_to_wait)
+            self.make_request(url, headers, auth)
+        return res
+
     def __init__(self):
         self.load_config('../config/config.json')
         self.etag = None
         self.event_url = 'https://api.github.com/events'
+        self.remaining_requests = 50
+        self.request_hour_start = dt.now()
+        self.auth = (self.config['user'], self.config['pass'])
 
     def load_config(self, tgt_file):
         """Load the github auth data."""
@@ -27,7 +46,7 @@ class GStalker(object):
         else:
             headers = {}
         url = '{}?page={}'.format(self.event_url, page)
-        obj = requests.get(url, headers=headers, auth=(self.config['user'], self.config['pass']))
+        obj = self.make_request(url, headers=headers, auth=self.auth)
         if obj.status_code == 200:
             print('returning obj')
             if 'Etag' in obj.headers:
@@ -40,7 +59,7 @@ class GStalker(object):
     def get_commit(self, repo, sha):
         url = '{}/commits/{}'.format(repo, sha)
         print(url)
-        vals = requests.get(url)
+        vals = self.make_request(url)
         if vals.status_code == 200:
             payload = vals.json()
             return payload
