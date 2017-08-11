@@ -3,6 +3,9 @@ from time import sleep, time
 from datetime import datetime as dt
 
 import requests
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+from database import engine
 
 
 class GStalker(object):
@@ -41,7 +44,8 @@ class GStalker(object):
         self.event_url = 'https://api.github.com/events'
         self.remaining_requests = 50
         self.request_hour_start = dt.now()
-        self.auth = (self.config['user'], self.config['pass'])
+        self.auth = (self.config.get('github_api').get('user'), self.config.get('github_api').get('pass'))
+        self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
 
     def load_config(self, tgt_file):
         """Load the github auth data."""
