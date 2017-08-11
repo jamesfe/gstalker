@@ -9,6 +9,7 @@ class GStalker(object):
 
     def make_request(self, url, headers=None, auth=None):
         """Make a request but also keep our rates down."""
+        # TODO: Add a specific sleep based on requests remaining.
         if headers is None:
             headers = {}
         if self.remaining_requests > 0:
