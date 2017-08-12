@@ -6,6 +6,7 @@ import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from database import engine
+# from models import RepositoryMoment, Dependency
 
 
 class GStalker(object):
@@ -45,6 +46,7 @@ class GStalker(object):
         self.remaining_requests = 50
         self.request_hour_start = dt.now()
         self.auth = (self.config.get('github_api').get('user'), self.config.get('github_api').get('pass'))
+        print('Initializing DB')
         self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
 
     def load_config(self, tgt_file):
