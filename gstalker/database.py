@@ -6,8 +6,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists, create_database
 
-from models import BASE
-
 
 def engine(db_config):
     url = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}'
@@ -23,9 +21,3 @@ def engine(db_config):
         except IntegrityError:
             return engine  # db has already been created
     return engine
-
-
-def create_all_tables(db_config):
-    """Create tables"""
-    eng = engine(db_config)
-    BASE.metadata.create_all(eng)
