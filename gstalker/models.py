@@ -21,8 +21,9 @@ class RepositoryMoment(BASE):
 
     id = Column(postgresql.UUID, default=generate_uuid, primary_key=True, unique=True)
     repo_name = Column(String(255), index=True, unique=True)
-    sha1 = Column(String(255), index=True, unique=True)
+    sha = Column(String(255), index=True, unique=True)
     user = Column(String(255), index=True, unique=True)
+    target_file_url = Column(String(255), index=True, unique=True)
     repo_type = Column(String(32), index=True)
     check_state = Column(String(32))
     created_at = Column(DateTime, default=datetime.now)

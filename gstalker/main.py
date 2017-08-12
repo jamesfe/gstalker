@@ -7,7 +7,7 @@ import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from database import engine
-from utils import load_config
+from utils import load_config, parse_for_meta
 # from models import RepositoryMoment, Dependency
 
 
@@ -82,6 +82,7 @@ class GStalker(object):
             print('bad status code: {}'.format(vals.status_code))
 
     def parse_event_page(self, res):
+        """From the event page, extract recent pushes (so we can peek into their commits)"""
         commits = []
         if res is not None:
             res_json = res.json()
@@ -91,10 +92,25 @@ class GStalker(object):
         return commits
 
     def validate_commit(self, payload):
+        """Check if a commit contains a file we are looking for."""
+        ret_vals = []
         files_changed = [_['filename'].lower() for _ in payload['files']]
+        check_values = ['requirements.txt', 'package.json']
         for item in files_changed:
-            if item in ['requirements.txt', 'package.json']:
-                print('Found an item: {}'.format(item))
+            for check in check_values:
+                if item.endswith(check):
+                    url_info = parse_for_meta(item.get('raw_url'))
+                    repo_data = {
+                        'repo_name': url_info['repo'],
+                        'sha': payload.get('sha'),
+                        'user': url_info['user'],
+                        'repo_type': check,
+                        'check_state': 'FOUND',
+                        'target_file_url': item.get('raw_url')
+                    }
+                    ret_vals.append(repo_data)
+                    print('Found an item: {}'.format(item))
+        return ret_vals
 
     def get_new_commits_by_file(self):
         for i in range(0, 10):
