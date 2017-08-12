@@ -6,6 +6,7 @@ import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 
 from database import engine
+from utils import load_config
 # from models import RepositoryMoment, Dependency
 
 
@@ -40,7 +41,7 @@ class GStalker(object):
             self.config_path = './config/config.json'
         else:
             self.config_path = config_path
-        self.load_config(self.config_path)
+        self.config = load_config(self.config_path)
         self.etag = None
         self.event_url = 'https://api.github.com/events'
         self.remaining_requests = 50
@@ -48,11 +49,6 @@ class GStalker(object):
         self.auth = (self.config.get('github_api').get('user'), self.config.get('github_api').get('pass'))
         print('Initializing DB')
         self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
-
-    def load_config(self, tgt_file):
-        """Load the github auth data."""
-        with open(tgt_file, 'r') as infile:
-            self.config = json.load(infile)
 
     def get_events(self, page=None):
         """Get the events stream from this URL, there are many pages but in general it seems we only get a few
