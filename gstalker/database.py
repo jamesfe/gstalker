@@ -6,6 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists, create_database
 
+from models import BASE
 
 
 def engine(db_config):
@@ -17,7 +18,14 @@ def engine(db_config):
             temp_config['user'] = db_config.get('user')
             temp_config['password'] = db_config.get('password')
             temp_engine = create_engine(url.format(**temp_config), pool_size=1)
+            print('Creating database')
             create_database(temp_engine.url)
         except IntegrityError:
             return engine  # db has already been created
     return engine
+
+
+def create_all_tables(db_config):
+    """Create tables"""
+    eng = engine(db_config)
+    BASE.metadata.create_all(eng)
