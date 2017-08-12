@@ -7,14 +7,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import database_exists, create_database
 
 
-def engine(config):
+
+def engine(db_config):
     url = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{name}'
-    engine = create_engine(url.format(**config), pool_size=1)
+    engine = create_engine(url.format(**db_config), pool_size=1)
     if not database_exists(engine.url):
         try:
-            temp_config = copy(config)
-            temp_config['user'] = config.get('user', 'postgres')
-            temp_config['password'] = config.get('password', 'postgres')
+            temp_config = copy(db_config)
+            temp_config['user'] = db_config.get('user')
+            temp_config['password'] = db_config.get('password')
             temp_engine = create_engine(url.format(**temp_config), pool_size=1)
             create_database(temp_engine.url)
         except IntegrityError:
