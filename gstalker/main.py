@@ -108,6 +108,8 @@ class GStalker(object):
         ret_vals = []
         assert type(payload) is dict
         for item in payload['files']:
+            if item.get('raw_url') is None:
+                continue
             if is_root_package_json(item.get('raw_url')) or item.get('filename').lower().endswith('requirements.txt'):
                 url_info = parse_for_meta(item.get('raw_url'))
                 repo_data = {
