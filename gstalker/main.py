@@ -29,8 +29,7 @@ class GStalker(object):
             moment_to_wait = (req_time * self.remaining_requests) / (self.reset_time - time())
             print('Requesting {}, Left: {}, Waiting: {}'.format(url, self.remaining_requests, moment_to_wait))
             if moment_to_wait > 0:
-                pass
-                # sleep(moment_to_wait)
+                sleep(moment_to_wait)
             return res
         elif self.remaining_requests <= 0:
             res = requests.get(url, headers=headers, auth=auth)
@@ -154,6 +153,8 @@ class GStalker(object):
             events = self.get_events(page=i)
             if events is not None:
                 commits = self.parse_event_page(events)
+                if len(commits) < 20:
+                    sleep(5)
                 for commit in commits:
                     commit_metadata = self.get_commit(commit['repo'], commit['sha'])
                     results = self.validate_commit(commit_metadata)
