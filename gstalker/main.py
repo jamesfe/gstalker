@@ -96,11 +96,11 @@ class GStalker(object):
     def validate_commit(self, payload):
         """Check if a commit contains a file we are looking for."""
         ret_vals = []
-        files_changed = [_['filename'].lower() for _ in payload['files']]
+        assert type(payload) is dict
         check_values = ['requirements.txt', 'package.json']
-        for item in files_changed:
+        for item in payload['files']:
             for check in check_values:
-                if item.endswith(check):
+                if item.get('filename').lower().endswith(check):
                     url_info = parse_for_meta(item.get('raw_url'))
                     repo_data = {
                         'repo_name': url_info['repo'],
