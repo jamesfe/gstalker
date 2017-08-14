@@ -20,9 +20,9 @@ class RepositoryMoment(BASE):
     __tablename__ = 'gs_repo'
 
     id = Column(postgresql.UUID, default=generate_uuid, primary_key=True, unique=True)
-    repo_name = Column(String(255), index=True, unique=True)
-    sha = Column(String(255), index=True, unique=True)
-    user = Column(String(255), index=True, unique=True)
+    repo_name = Column(String(255), index=True)
+    sha = Column(String(255), index=True)
+    user = Column(String(255), index=True)
     target_file_url = Column(String(255), index=True, unique=True)
     repo_type = Column(String(32), index=True)
     check_state = Column(String(32))
@@ -34,11 +34,11 @@ class Dependency(BASE):
     """A dependency that a repository has."""
     __tablename__ = 'gs_deps'
     id = Column(postgresql.UUID, default=generate_uuid, primary_key=True, unique=True)
-    dep_name = Column(String(255), index=True, unique=True)
+    dep_name = Column(String(255), index=True)
     major_ver = Column(Integer, nullable=False)
     minor_ver = Column(Integer, nullable=False)
     exact_version = Column(String(255), index=True)
     created_at = Column(DateTime, default=datetime.now)
     repository_moment = Column(postgresql.UUID, ForeignKey('gs_repo.id'))
     is_dev_dep = Column(Boolean, default=False)
-    lang = Column(String(32), index=True, unique=False)
+    lang = Column(String(32), index=True)
