@@ -21,9 +21,9 @@ class GStalker(object):
             headers = {}
         if self.remaining_requests > 0:
             res = requests.get(url, headers=headers, auth=auth)
-            self.remining_requests = res.headers['X-RateLimit-Remaining']
-            self.reset_time = res.headers['X-RateLimit-Reset']
-            print('Remining requests: {}'.format(self.remaining_requests))
+            self.remaining_requests = int(res.headers['X-RateLimit-Remaining'])
+            self.reset_time = int(res.headers['X-RateLimit-Reset'])
+            print('Requesting {}, Left: {}'.format(url, self.remaining_requests))
             return res
         elif self.remaining_requests <= 0:
             res = requests.get(url, headers=headers, auth=auth)
@@ -77,12 +77,15 @@ class GStalker(object):
     def get_commit(self, repo, sha):
         url = '{}/commits/{}'.format(repo, sha)
         print('Checking Commit: ', url)
-        vals = self.make_request(url)
+        vals = self.make_request(url, auth=self.auth)
         if vals.status_code == 200:
             payload = vals.json()
             return payload
         else:
             print('bad status code: {}'.format(vals.status_code))
+            print('content: ---------------------------------------')
+            print(vals.text())
+            print('end: ---------------------------------------')
 
     def parse_event_page(self, res):
         """From the event page, extract recent pushes (so we can peek into their commits)"""
