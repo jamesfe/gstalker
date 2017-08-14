@@ -7,9 +7,9 @@ import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from database import engine
-from utils import load_config, parse_for_meta
-from models import RepositoryMoment
+from gstalker.utils import load_config, parse_for_meta
+from gstalker.models import RepositoryMoment
+from gstalker.database import engine
 
 
 class GStalker(object):

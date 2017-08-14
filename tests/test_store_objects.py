@@ -4,7 +4,7 @@ import unittest
 import json
 
 from gstalker.main import GStalker
-from gstalker.utils import parse_for_meta
+from gstalker.models import RepositoryMoment
 
 
 class TestStoreCommit(unittest.TestCase):
@@ -32,8 +32,12 @@ class TestStoreCommit(unittest.TestCase):
         self.assertDictEqual(res[0], expected)
         self.assertEqual(len(res), 1)
 
-    def test_parse_for_metadata(self):
-        url = 'https://github.com/xuqianjin/ExpressMongooseRestApi/raw/3b96ee2ec03212613bb3509a7d0f0cdad120bce6/package.json'
-        res = parse_for_meta(url)
-        self.assertEqual(res['user'], 'xuqianjin')
-        self.assertEqual(res['repo'], 'expressmongooserestapi')
+    def test_insert_actually_works(self):
+        item = GStalker(init_db=True)
+        with open('./tests/test_data/package_json_added_with_dashes_in_repo_name.json', 'r') as t:
+            test_payload = json.load(t)
+        items = item.db.query(RepositoryMoment).count()
+        commits = item.validate_commit(test_payload)
+        for val in commits:
+            item.store_commit(val)
+        self.assertEqual(items + 1, item.db.query(RepositoryMoment).count())
