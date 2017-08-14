@@ -16,14 +16,21 @@ class GStalker(object):
 
     def make_request(self, url, headers=None, auth=None):
         """Make a request but also keep our rates down."""
-        # TODO: Add a specific sleep based on requests remaining.
         if headers is None:
             headers = {}
         if self.remaining_requests > 0:
+            pre = time()
             res = requests.get(url, headers=headers, auth=auth)
+            req_time = time() - pre
             self.remaining_requests = int(res.headers['X-RateLimit-Remaining'])
             self.reset_time = int(res.headers['X-RateLimit-Reset'])
-            print('Requesting {}, Left: {}'.format(url, self.remaining_requests))
+            # We calculate the time it takes to make a request, then we multiply that by the number left and see
+            # how long we should wait.
+            moment_to_wait = (req_time * self.remaining_requests) / (self.reset_time - time())
+            print('Requesting {}, Left: {}, Waiting: {}'.format(url, self.remaining_requests, moment_to_wait))
+            if moment_to_wait > 0:
+                pass
+                # sleep(moment_to_wait)
             return res
         elif self.remaining_requests <= 0:
             res = requests.get(url, headers=headers, auth=auth)
@@ -76,7 +83,6 @@ class GStalker(object):
 
     def get_commit(self, repo, sha):
         url = '{}/commits/{}'.format(repo, sha)
-        print('Checking Commit: ', url)
         vals = self.make_request(url, auth=self.auth)
         if vals.status_code == 200:
             payload = vals.json()
@@ -140,12 +146,12 @@ class GStalker(object):
                     results = self.validate_commit(commit_metadata)
                     for item in results:
                         self.store_commit(item)
-                    sleep(0.5)
 
 
 def main():
     grabber = GStalker()
-    grabber.get_new_commits_by_file()
+    for i in range(0, 100):
+        grabber.get_new_commits_by_file()
 
 
 if __name__ == '__main__':
