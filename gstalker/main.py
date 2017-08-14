@@ -5,10 +5,11 @@ from datetime import datetime as dt
 
 import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from database import engine
 from utils import load_config, parse_for_meta
-# from models import RepositoryMoment, Dependency
+from models import RepositoryMoment
 
 
 class GStalker(object):
@@ -109,8 +110,20 @@ class GStalker(object):
                         'target_file_url': item.get('raw_url')
                     }
                     ret_vals.append(repo_data)
-                    print('Found an item: {}'.format(item))
         return ret_vals
+
+    def store_commit(self, item):
+        """Store the commit in the database."""
+        c = RepositoryMoment(**item)
+        self.session.add(c)
+        try:
+            self.session.commit()
+        except IntegrityError as err:
+            print(err)
+            self.session.rollback()
+        except SQLAlchemyError as err:
+            print(err)
+            self.session.rollback()
 
     def get_new_commits_by_file(self):
         for i in range(0, 10):
@@ -119,7 +132,9 @@ class GStalker(object):
                 commits = self.parse_event_page(events)
                 for commit in commits:
                     commit_metadata = self.get_commit(commit['repo'], commit['sha'])
-                    self.validate_commit(commit_metadata)
+                    results = self.validate_commit(commit_metadata)
+                    for item in results:
+                        self.store_commit(item)
                     sleep(0.5)
 
 
