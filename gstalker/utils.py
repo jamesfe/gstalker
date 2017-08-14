@@ -21,3 +21,27 @@ def parse_for_meta(url):
         }
     else:
         return None
+
+
+def parse_js_dep(key, value):
+        try:
+            sv = semver(value)
+        except ValueError:
+            major = 0
+            minor = 0
+        major = sv.major_ver
+        minor = sv.minor_ver
+        return {
+            'dep_name': key,
+            'exact_version': value,
+            'major_ver': major,
+            'minor_ver': minor,
+        }
+
+
+def is_root_package_json(url):
+    pat = re.compile('https:\/\/github.com\/([a-zA-Z0-9]+)\/([_\.\-A-Za-z0-9]+)\/raw/([a-f0-9]{40})/package.json')
+    matches = pat.match(url)
+    if matches is None:
+        return False
+    return True

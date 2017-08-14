@@ -22,7 +22,7 @@ class TestStoreCommit(unittest.TestCase):
         self.assertIsInstance(res, list)
         self.assertIsInstance(res[0], dict)
         expected = {
-            'repo_name': u'expressmongooserestapi',
+            'repo_name': u'ExpressMongooseRestApi',
             'sha': u'8f57f8bcd08e3e3ba53e43e971db98957097d95b',
             'user': u'xuqianjin',
             'repo_type': 'package.json',

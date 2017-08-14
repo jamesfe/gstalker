@@ -2,7 +2,7 @@
 
 import unittest
 
-from gstalker.utils import parse_for_meta
+from gstalker.utils import parse_for_meta, is_root_package_json
 
 
 class TestStoreCommit(unittest.TestCase):

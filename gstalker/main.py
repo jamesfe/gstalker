@@ -7,8 +7,8 @@ import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from gstalker.utils import load_config, parse_for_meta
-from gstalker.models import RepositoryMoment
+from gstalker.utils import load_config, parse_for_meta, parse_js_dep, is_root_package_json
+from gstalker.models import RepositoryMoment, Dependency
 from gstalker.database import engine
 
 
@@ -107,20 +107,18 @@ class GStalker(object):
         """Check if a commit contains a file we are looking for."""
         ret_vals = []
         assert type(payload) is dict
-        check_values = ['requirements.txt', 'package.json']
         for item in payload['files']:
-            for check in check_values:
-                if item.get('filename').lower().endswith(check):
-                    url_info = parse_for_meta(item.get('raw_url'))
-                    repo_data = {
-                        'repo_name': url_info['repo'],
-                        'sha': payload.get('sha'),
-                        'user': url_info['user'],
-                        'repo_type': check,
-                        'check_state': 'FOUND',
-                        'target_file_url': item.get('raw_url')
-                    }
-                    ret_vals.append(repo_data)
+            if is_root_package_json(item.get('raw_url')) or item.get('filename').lower().endswith('requirements.txt'):
+                url_info = parse_for_meta(item.get('raw_url'))
+                repo_data = {
+                    'repo_name': url_info['repo'],
+                    'sha': payload.get('sha'),
+                    'user': url_info['user'],
+                    'repo_type': item.get('filename').lower(),
+                    'check_state': 'FOUND',
+                    'target_file_url': item.get('raw_url')
+                }
+                ret_vals.append(repo_data)
         return ret_vals
 
     def store_commit(self, item):
