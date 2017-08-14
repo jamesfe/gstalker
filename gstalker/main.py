@@ -23,6 +23,7 @@ class GStalker(object):
             res = requests.get(url, headers=headers, auth=auth)
             self.remining_requests = res.headers['X-RateLimit-Remaining']
             self.reset_time = res.headers['X-RateLimit-Reset']
+            print('Remining requests: {}'.format(self.remaining_requests))
             return res
         elif self.remaining_requests <= 0:
             res = requests.get(url, headers=headers, auth=auth)
@@ -116,15 +117,15 @@ class GStalker(object):
     def store_commit(self, item):
         """Store the commit in the database."""
         c = RepositoryMoment(**item)
-        self.session.add(c)
+        self.db.add(c)
         try:
-            self.session.commit()
+            self.db.commit()
         except IntegrityError as err:
             print(err)
-            self.session.rollback()
+            self.db.rollback()
         except SQLAlchemyError as err:
             print(err)
-            self.session.rollback()
+            self.db.rollback()
 
     def get_new_commits_by_file(self):
         for i in range(0, 10):
