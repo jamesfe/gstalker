@@ -4,4 +4,4 @@ test:
 
 .PHONY: run
 run:
-	python3 ./gstalker/main.py
+	python3 -m gstalker.main
