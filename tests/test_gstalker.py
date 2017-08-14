@@ -11,7 +11,7 @@ class TestGStalkerMain(unittest.TestCase):
         pass
 
     def test_get_events_returns_json_object(self):
-        item = GStalker(config_path='./config/config.json')
+        item = GStalker(config_path='./config/config.json', init_db=False)
         res = item.get_events()
         self.assertIsNotNone(res)
         json_res = res.json()
@@ -19,7 +19,7 @@ class TestGStalkerMain(unittest.TestCase):
         self.assertIsInstance(json_res[0], dict)
 
     def test_make_request_checks_remaining_requests(self):
-        item = GStalker(config_path='./config/config.json')
+        item = GStalker(config_path='./config/config.json', init_db=False)
         item.remaining_requests = -1
         item.make_request(item.event_url, auth=item.auth)
 

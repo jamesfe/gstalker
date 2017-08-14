@@ -38,7 +38,7 @@ class GStalker(object):
             print('No requests left.')
             return None
 
-    def __init__(self, config_path=None):
+    def __init__(self, config_path=None, init_db=True):
         if config_path is None:
             self.config_path = './config/config.json'
         else:
@@ -49,8 +49,9 @@ class GStalker(object):
         self.remaining_requests = 50
         self.request_hour_start = dt.now()
         self.auth = (self.config.get('github_api').get('user'), self.config.get('github_api').get('pass'))
-        print('Initializing DB')
-        self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
+        if init_db:
+            print('Initializing DB')
+            self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
 
     def get_events(self, page=None):
         """Get the events stream from this URL, there are many pages but in general it seems we only get a few
