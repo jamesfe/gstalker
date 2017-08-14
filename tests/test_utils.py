@@ -17,4 +17,10 @@ class TestStoreCommit(unittest.TestCase):
         url = 'https://github.com/xuqianjin/ExpressMongooseRestApi/raw/3b96ee2ec03212613bb3509a7d0f0cdad120bce6/package.json'
         res = parse_for_meta(url)
         self.assertEqual(res['user'], 'xuqianjin')
-        self.assertEqual(res['repo'], 'expressmongooserestapi')
+        self.assertEqual(res['repo'], 'ExpressMongooseRestApi')
+
+    def test_parse_for_metadata_includes_dots(self):
+        url = 'https://github.com/selfsun/selffun.github.io/commits/c04b63c3d04814363d22d764c717edb41bb1a971'
+        res = parse_for_meta(url)
+        self.assertEqual(res['user'], 'selfsun')
+        self.assertEqual(res['repo'], 'selffun.github.io')
