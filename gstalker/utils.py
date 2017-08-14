@@ -12,7 +12,7 @@ def load_config(tgt_file):
 
 def parse_for_meta(url):
     """Get the repo and username from a SHA commit file URL."""
-    pat = re.compile('https:\/\/github.com\/([a-z0-9]+)\/([a-z0-9]+)\/.*')
+    pat = re.compile('https:\/\/github.com\/([a-z0-9]+)\/([\-a-z0-9]+)\/.*')
     url = url.lower()
     matches = pat.match(url)
     if len(matches.groups()) == 2:
