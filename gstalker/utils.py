@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import semver
 
 
 def load_config(tgt_file):

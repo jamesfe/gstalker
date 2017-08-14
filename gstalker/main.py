@@ -134,6 +134,19 @@ class GStalker(object):
             print(err)
             self.db.rollback()
 
+    def store_dep(self, item):
+        """Store the commit in the database."""
+        c = Dependency(**item)
+        self.db.add(c)
+        try:
+            self.db.commit()
+        except IntegrityError as err:
+            print(err)
+            self.db.rollback()
+        except SQLAlchemyError as err:
+            print(err)
+            self.db.rollback()
+
     def get_new_commits_by_file(self):
         for i in range(0, 10):
             events = self.get_events(page=i)
@@ -144,6 +157,23 @@ class GStalker(object):
                     results = self.validate_commit(commit_metadata)
                     for item in results:
                         self.store_commit(item)
+        self.etag = None
+
+    def retrieve_and_parse_database_deps(self):
+        js_deps = self.db.query(RepositoryMoment).filter(RepositoryMoment.check_state == 'FOUND') \
+                                                 .filter(RepositoryMoment.repo_type == 'package.json')
+        item = js_deps.first()
+        package = self.make_request(item.target_file_url, auth=self.auth)
+        if package.status_code == 200:
+            data = package.json()
+        for k, v in data['devDependencies']:
+            dep_val = parse_js_dep(k, v)
+            dep_val.update({
+                'repository_moment': item.id,
+                'lang': 'js',
+                'is_dev_dep': True
+            })
+            self.store_dep(dep_val)
 
 
 def main():
