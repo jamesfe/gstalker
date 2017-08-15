@@ -14,7 +14,15 @@ from gstalker.database import engine
 
 class GStalker(object):
 
-    def make_request(self, url, headers=None, auth=None):
+    def make_request(self, url):
+        res = requests.get(url)
+        if res.status_code == 200:
+            return res
+        else:
+            print('Bad status code on get request: {}'.format(res.status_code))
+            return None
+
+    def make_api_request(self, url, headers=None, auth=None):
         """Make a request but also keep our rates down."""
         if headers is None:
             headers = {}
@@ -40,7 +48,7 @@ class GStalker(object):
             seconds_to_wait = self.reset_time - time()
             print('Sleeping for {} seconds, rate limits too low.'.format(seconds_to_wait))
             sleep(seconds_to_wait)
-            res = self.make_request(url, headers, auth)
+            res = self.make_api_request(url, headers, auth)
         else:
             print('No requests left.')
             return None
@@ -71,7 +79,7 @@ class GStalker(object):
         else:
             headers = {}
         url = '{}?page={}'.format(self.event_url, page)
-        obj = self.make_request(url, headers=headers, auth=self.auth)
+        obj = self.make_api_request(url, headers=headers, auth=self.auth)
         if obj.status_code == 200:
             if 'Etag' in obj.headers:
                 self.etag = obj.headers['Etag']
@@ -82,7 +90,7 @@ class GStalker(object):
 
     def get_commit(self, repo, sha):
         url = '{}/commits/{}'.format(repo, sha)
-        vals = self.make_request(url, auth=self.auth)
+        vals = self.make_api_request(url, auth=self.auth)
         if vals.status_code == 200:
             payload = vals.json()
             return payload
@@ -166,7 +174,7 @@ class GStalker(object):
         js_deps = self.db.query(RepositoryMoment).filter(RepositoryMoment.check_state == 'FOUND') \
                                                  .filter(RepositoryMoment.repo_type == 'package.json')
         item = js_deps.first()
-        package = self.make_request(item.target_file_url, auth=self.auth)
+        package = self.make_request(item.target_file_url)
         if package.status_code == 200:
             data = package.json()
         for k, v in data['devDependencies']:
