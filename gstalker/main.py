@@ -170,6 +170,15 @@ class GStalker(object):
                         self.store_commit(item)
         self.etag = None
 
+    def create_db_dependency(self, k, v, item_id, dd=False):
+        dep_val = parse_js_dep(k, v)
+        dep_val.update({
+            'repository_moment': item_id,
+            'lang': 'js',
+            'is_dev_dep': dd
+        })
+        return dep_val
+
     def retrieve_and_parse_database_deps(self):
         js_deps = self.db.query(RepositoryMoment).filter(RepositoryMoment.check_state == 'FOUND') \
                                                  .filter(RepositoryMoment.repo_type == 'package.json')
@@ -177,20 +186,22 @@ class GStalker(object):
         package = self.make_request(item.target_file_url)
         if package.status_code == 200:
             data = package.json()
-        for k, v in data['devDependencies']:
-            dep_val = parse_js_dep(k, v)
-            dep_val.update({
-                'repository_moment': item.id,
-                'lang': 'js',
-                'is_dev_dep': True
-            })
-            self.store_dep(dep_val)
+        for k, v in data['devDependencies'].items():
+            item = self.create_db_dependency(k, v, item.id, dd=True)
+            self.store_dep(item)
+        for k, v in data['dependencies'].items():
+            item = self.create_db_dependency(k, v, item.id, dd=False)
+            self.store_dep(item)
+        item.check_sate = 'UPDATED'
+        self.db.commit()
 
 
 def main():
     grabber = GStalker()
-    for i in range(0, 100):
-        grabber.get_new_commits_by_file()
+    grabber.retrieve_and_parse_database_deps()
+    # for i in range(0, 100):
+    #     grabber.get_new_commits_by_file()
+
 
 
 if __name__ == '__main__':
