@@ -18,6 +18,9 @@ class GStalker(object):
         res = requests.get(url)
         if res.status_code == 200:
             return res
+        if res.status_code == 404:
+            pass
+            # TODO: Update the database, this is gone!
         else:
             print('Bad status code on get request: {}'.format(res.status_code))
             return None
@@ -182,26 +185,32 @@ class GStalker(object):
     def retrieve_and_parse_database_deps(self):
         js_deps = self.db.query(RepositoryMoment).filter(RepositoryMoment.check_state == 'FOUND') \
                                                  .filter(RepositoryMoment.repo_type == 'package.json')
+        if js_deps.count() <= 0:
+            return None
+
         item = js_deps.first()
         package = self.make_request(item.target_file_url)
-        if package.status_code == 200:
+        if package is not None:
             data = package.json()
-        for k, v in data['devDependencies'].items():
-            item = self.create_db_dependency(k, v, item.id, dd=True)
-            self.store_dep(item)
-        for k, v in data['dependencies'].items():
-            item = self.create_db_dependency(k, v, item.id, dd=False)
-            self.store_dep(item)
-        item.check_sate = 'UPDATED'
-        self.db.commit()
+            if 'devDependencies' in data:
+                for k, v in data['devDependencies'].items():
+                    dep = self.create_db_dependency(k, v, item.id, dd=True)
+                    self.store_dep(dep)
+            if 'dependencies' in data:
+                for k, v in data['dependencies'].items():
+                    dep = self.create_db_dependency(k, v, item.id, dd=False)
+                    self.store_dep(dep)
+            item.check_state = 'UPDATED'
+            self.db.commit()
 
 
 def main():
     grabber = GStalker()
-    grabber.retrieve_and_parse_database_deps()
+    i = 1
+    while i is not None:
+        grabber.retrieve_and_parse_database_deps()
     # for i in range(0, 100):
     #     grabber.get_new_commits_by_file()
-
 
 
 if __name__ == '__main__':

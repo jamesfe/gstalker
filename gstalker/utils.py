@@ -25,20 +25,26 @@ def parse_for_meta(url):
 
 
 def parse_js_dep(key, value):
-        try:
-            sv = semver.parse(value)
-        except ValueError:
-            major = 0
-            minor = 0
-        else:
-            major = sv['major']
-            minor = sv['minor']
-        return {
-            'dep_name': key,
-            'exact_version': value,
-            'major_ver': major,
-            'minor_ver': minor,
-        }
+    # first we clean the value
+    clean_value = ''
+    for i in value:
+        if i in '1234567890.':
+            clean_value = clean_value + i
+    print('using {} instead of {}'.format(clean_value, value))
+    try:
+        sv = semver.parse(clean_value)
+    except ValueError:
+        major = 0
+        minor = 0
+    else:
+        major = sv['major']
+        minor = sv['minor']
+    return {
+        'dep_name': key,
+        'exact_version': value,
+        'major_ver': major,
+        'minor_ver': minor,
+    }
 
 
 def is_root_package_json(url):
