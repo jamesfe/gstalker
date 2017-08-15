@@ -26,12 +26,13 @@ def parse_for_meta(url):
 
 def parse_js_dep(key, value):
         try:
-            sv = semver(value)
+            sv = semver.parse(value)
         except ValueError:
             major = 0
             minor = 0
-        major = sv.major_ver
-        minor = sv.minor_ver
+        else:
+            major = sv['major']
+            minor = sv['minor']
         return {
             'dep_name': key,
             'exact_version': value,

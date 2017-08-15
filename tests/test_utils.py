@@ -2,7 +2,7 @@
 
 import unittest
 
-from gstalker.utils import parse_for_meta, is_root_package_json
+from gstalker.utils import parse_for_meta, is_root_package_json, parse_js_dep
 
 
 class TestStoreCommit(unittest.TestCase):
@@ -42,3 +42,27 @@ class TestStoreCommit(unittest.TestCase):
                 'https://github.com/xuqianjin/ExpressMongooseRestApi/raw/3b96ee2ec03212613bb3509a7d0f0cdad120bce6/node_modules/package.json']
         for item in good:
             self.assertFalse(is_root_package_json(item))
+
+
+class TestParseJSDeps(unittest.TestCase):
+
+    def test_crazy_values_do_not_throw_errors(self):
+        crazy_values = ['blah', '123blah', 'blah-123', 'http://blah.com', 'http://github.com/blah/blah']
+        for item in crazy_values:
+            res = parse_js_dep('', item)
+            self.assertEqual(res['major_ver'], 0)
+            self.assertEqual(res['minor_ver'], 0)
+            self.assertEqual(res['exact_version'], item)
+
+    def test_expected_values_are_returned(self):
+        value_map = {
+            '1.2.2': {'major_ver': 1,
+                      'minor_ver': 2},
+            '2.3.4': {'major_ver': 2,
+                      'minor_ver': 3}
+        }
+
+        for k, v in value_map.items():
+            res = parse_js_dep('', k)
+            self.assertEqual(res['major_ver'], v['major_ver'])
+            self.assertEqual(res['minor_ver'], v['minor_ver'])
