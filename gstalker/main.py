@@ -100,7 +100,7 @@ class GStalker(object):
         else:
             print('bad status code: {}'.format(vals.status_code))
             print('content: ---------------------------------------')
-            print(vals.text())
+            print(vals)
             print('end: ---------------------------------------')
 
     def parse_event_page(self, res):
@@ -209,8 +209,8 @@ def main():
     i = 1
     while i is not None:
         grabber.retrieve_and_parse_database_deps()
-    # for i in range(0, 100):
-    #     grabber.get_new_commits_by_file()
+        for i in range(0, 100):
+            grabber.get_new_commits_by_file()
 
 
 if __name__ == '__main__':
