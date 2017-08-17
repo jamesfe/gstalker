@@ -19,7 +19,7 @@ class TestGStalkerMain(unittest.TestCase):
     def test_make_request_checks_remaining_requests(self):
         item = GStalker(config_path='./config/config.json', init_db=False)
         item.remaining_requests = -1
-        item.make_request(item.event_url, auth=item.auth)
+        item.make_api_request(item.event_url, auth=item.auth)
 
     def test_validate_commit(self):
         with open('./tests/test_data/bad_commit_for_validation.json', 'r') as t:

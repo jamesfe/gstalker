@@ -30,7 +30,6 @@ def parse_js_dep(key, value):
     for i in value:
         if i in '1234567890.':
             clean_value = clean_value + i
-    print('using {} instead of {}'.format(clean_value, value))
     try:
         sv = semver.parse(clean_value)
     except ValueError:

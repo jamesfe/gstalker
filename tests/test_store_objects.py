@@ -34,6 +34,13 @@ class TestStoreCommit(unittest.TestCase):
 
     def test_insert_actually_works(self):
         item = GStalker(init_db=True)
+        try:
+            bad_repo = item.db.query(RepositoryMoment).filter_by(sha='a7565173719bff61c5910d6fcdbdf8de2ff90374')
+            delete_target = bad_repo.first()
+            item.db.delete(delete_target)
+            item.db.commit()
+        except:
+            pass
         with open('./tests/test_data/package_json_added_with_dashes_in_repo_name.json', 'r') as t:
             test_payload = json.load(t)
         items = item.db.query(RepositoryMoment).count()
