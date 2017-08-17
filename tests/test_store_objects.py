@@ -11,8 +11,8 @@ class TestStoreCommit(unittest.TestCase):
 
     def test_validate_commit_fails_on_non_list(self):
         item = GStalker(init_db=False)
-        with self.assertRaises(AssertionError):
-            item.validate_commit('blah')
+        test_validate = item.validate_commit('blah')
+        self.assertIsNone(test_validate)
 
     def test_validate_commit(self):
         item = GStalker(init_db=False)

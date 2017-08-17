@@ -116,7 +116,8 @@ class GStalker(object):
     def validate_commit(self, payload):
         """Check if a commit contains a file we are looking for."""
         ret_vals = []
-        assert type(payload) is dict
+        if type(payload) != dict:
+            return
         for item in payload['files']:
             if item.get('raw_url') is None:
                 continue
