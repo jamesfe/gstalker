@@ -112,7 +112,7 @@ class GStalker(object):
             if len(pushes) > 0:
                 for p in pushes:
                     for commit in p['payload']['commits']:
-                        commits.append({'repo': pushes[0]['repo']['url'], 'sha': commit['sha']})
+                        commits.append({'repo': p['repo']['url'], 'sha': commit['sha']})
         return commits
 
     def validate_commit(self, payload):
