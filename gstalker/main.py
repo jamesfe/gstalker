@@ -109,8 +109,10 @@ class GStalker(object):
         if res is not None:
             res_json = res.json()
             pushes = [_ for _ in res_json if _['type'] == 'PushEvent']
-            for commit in pushes[0]['payload']['commits']:
-                commits.append({'repo': pushes[0]['repo']['url'], 'sha': commit['sha']})
+            if len(pushes) > 0:
+                for p in pushes:
+                    for commit in p['payload']['commits']:
+                        commits.append({'repo': pushes[0]['repo']['url'], 'sha': commit['sha']})
         return commits
 
     def validate_commit(self, payload):
