@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from time import sleep, time
 from datetime import datetime as dt
 
 import requests
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+import coloredlogs
 
 from gstalker.utils import load_config, parse_for_meta, parse_js_dep, is_root_package_json
 from gstalker.models import RepositoryMoment, Dependency
 from gstalker.database import engine
+
+
+logger = logging.getLogger(__name__)
+coloredlogs.install(format='%(asctime)s - %(levelname)s: %(message)s', level='INFO', logger=logger)
 
 
 class GStalker(object):
@@ -22,7 +28,7 @@ class GStalker(object):
             pass
             # TODO: Update the database, this is gone!
         else:
-            print('Bad status code on get request: {}'.format(res.status_code))
+            logger.error('Bad status code on get request: {}'.format(res.status_code))
             return None
 
     def make_api_request(self, url, headers=None, auth=None):
@@ -38,22 +44,22 @@ class GStalker(object):
             # We calculate the time it takes to make a request, then we multiply that by the number left and see
             # how long we should wait.
             moment_to_wait = (req_time * self.remaining_requests) / (self.reset_time - time())
-            print('Requesting {}, Left: {}, Waiting: {}'.format(url, self.remaining_requests, moment_to_wait))
+            logger.info('Requesting {}, Left: {}, Waiting: {}'.format(url, self.remaining_requests, moment_to_wait))
             if moment_to_wait > 0:
                 sleep(moment_to_wait)
             return res
         elif self.remaining_requests <= 0:
             res = requests.get(url, headers=headers, auth=auth)
             if 'X-RateLimit-Reset' not in res.headers:
-                print('Not receiving rate limit reset in headers, returning None.')
+                logger.warning('Not receiving rate limit reset in headers, returning None.')
                 return None
         elif self.reset_time is not None:
             seconds_to_wait = self.reset_time - time()
-            print('Sleeping for {} seconds, rate limits too low.'.format(seconds_to_wait))
+            logger.warning('Sleeping for {} seconds, rate limits too low.'.format(seconds_to_wait))
             sleep(seconds_to_wait)
             res = self.make_api_request(url, headers, auth)
         else:
-            print('No requests left.')
+            logger.error('No requests left.')
             return None
 
     def __init__(self, config_path=None, init_db=True):
@@ -68,7 +74,7 @@ class GStalker(object):
         self.request_hour_start = dt.now()
         self.auth = (self.config.get('github_api').get('user'), self.config.get('github_api').get('pass'))
         if init_db:
-            print('Initializing DB')
+            logger.info('Initializing DB')
             self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
 
     def get_events(self, page=None):
@@ -88,7 +94,7 @@ class GStalker(object):
                 self.etag = obj.headers['Etag']
             return obj
         else:
-            print(obj.status_code)
+            logger.error(obj.status_code)
             return None
 
     def get_commit(self, repo, sha):
@@ -142,10 +148,10 @@ class GStalker(object):
         try:
             self.db.commit()
         except IntegrityError as err:
-            print(err)
+            logger.error(err)
             self.db.rollback()
         except SQLAlchemyError as err:
-            print(err)
+            logger.error(err)
             self.db.rollback()
 
     def store_dep(self, item):
@@ -155,10 +161,10 @@ class GStalker(object):
         try:
             self.db.commit()
         except IntegrityError as err:
-            print(err)
+            logger.error(err)
             self.db.rollback()
         except SQLAlchemyError as err:
-            print(err)
+            logger.error(err)
             self.db.rollback()
 
     def get_new_commits_by_file(self):
@@ -171,7 +177,7 @@ class GStalker(object):
                     try:
                         commit_metadata = self.get_commit(commit['repo'], commit['sha'])
                     except ValueError as e:
-                        print('Unable to get commit: error: {}'.format(e))
+                        logger.warning('Unable to get commit: error: {}'.format(e))
                         continue
                     results = self.validate_commit(commit_metadata)
                     if results is not None:
