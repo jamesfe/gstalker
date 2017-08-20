@@ -92,16 +92,14 @@ class GStalker(object):
             return None
 
     def get_commit(self, repo, sha):
+        """Go to the internet and get a commit; otherwise return nothing."""
         url = '{}/commits/{}'.format(repo, sha)
         vals = self.make_api_request(url, auth=self.auth)
         if vals.status_code == 200:
             payload = vals.json()
             return payload
         else:
-            print('bad status code: {}'.format(vals.status_code))
-            print('content: ---------------------------------------')
-            print(vals)
-            print('end: ---------------------------------------')
+            raise ValueError('Could not find commit, status code: {}'.format(vals.status_code))
 
     def parse_event_page(self, res):
         """From the event page, extract recent pushes (so we can peek into their commits)"""
@@ -119,6 +117,7 @@ class GStalker(object):
         """Check if a commit contains a file we are looking for."""
         ret_vals = []
         if type(payload) != dict:
+            import pdb; pdb.set_trace()
             return
         for item in payload['files']:
             if item.get('raw_url') is None:
@@ -163,17 +162,21 @@ class GStalker(object):
             self.db.rollback()
 
     def get_new_commits_by_file(self):
+        """Get the events page, check for pushes and check each push for files we care about."""
         for i in range(0, 10):
             events = self.get_events(page=i)
             if events is not None:
                 commits = self.parse_event_page(events)
-                if len(commits) < 20:
-                    sleep(5)
                 for commit in commits:
-                    commit_metadata = self.get_commit(commit['repo'], commit['sha'])
+                    try:
+                        commit_metadata = self.get_commit(commit['repo'], commit['sha'])
+                    except ValueError as e:
+                        print('Unable to get commit: error: {}'.format(e))
+                        continue
                     results = self.validate_commit(commit_metadata)
-                    for item in results:
-                        self.store_commit(item)
+                    if results is not None:
+                        for item in results:
+                            self.store_commit(item)
         self.etag = None
 
     def create_db_dependency(self, k, v, item_id, dd=False):
