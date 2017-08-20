@@ -123,8 +123,8 @@ class GStalker(object):
         """Check if a commit contains a file we are looking for."""
         ret_vals = []
         if type(payload) != dict:
-            import pdb; pdb.set_trace()
-            return
+            logger.error('Received {} instead of dict in validate_commit'.format(type(payload)))
+            raise ValueError('Value supplied to validate_commit must be dict, received {}'.format(type(payload)))
         for item in payload['files']:
             if item.get('raw_url') is None:
                 continue
@@ -174,6 +174,7 @@ class GStalker(object):
             if events is not None:
                 commits = self.parse_event_page(events)
                 for commit in commits:
+                    results = None
                     try:
                         commit_metadata = self.get_commit(commit['repo'], commit['sha'])
                     except ValueError as e:
