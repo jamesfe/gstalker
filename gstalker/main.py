@@ -221,9 +221,14 @@ def main():
     grabber = GStalker()
     i = 1
     while i is not None:
-        grabber.retrieve_and_parse_database_deps()
-        for i in range(0, 100):
-            grabber.get_new_commits_by_file()
+        try:
+            grabber.retrieve_and_parse_database_deps()
+            for i in range(0, 100):
+                grabber.get_new_commits_by_file()
+        except:  # noqa
+            secs = 30
+            logger.warning('There was a big issue, sleeping for {} seconds'.format(secs))
+            sleep(secs)
 
 
 if __name__ == '__main__':
