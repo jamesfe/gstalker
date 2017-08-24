@@ -220,15 +220,21 @@ class GStalker(object):
 def main():
     grabber = GStalker()
     i = 1
+    real_run = False
     while i is not None:
-        try:
+        if real_run:
+            try:
+                grabber.retrieve_and_parse_database_deps()
+                for i in range(0, 100):
+                    grabber.get_new_commits_by_file()
+            except:  # noqa
+                secs = 30
+                logger.warning('There was a big issue, sleeping for {} seconds'.format(secs))
+                sleep(secs)
+        else:
             grabber.retrieve_and_parse_database_deps()
             for i in range(0, 100):
                 grabber.get_new_commits_by_file()
-        except:  # noqa
-            secs = 30
-            logger.warning('There was a big issue, sleeping for {} seconds'.format(secs))
-            sleep(secs)
 
 
 if __name__ == '__main__':
