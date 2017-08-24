@@ -37,8 +37,15 @@ class Dependency(BASE):
     dep_name = Column(String(255), index=True)
     major_ver = Column(Integer, nullable=False)
     minor_ver = Column(Integer, nullable=False)
+    patch_ver = Column(Integer, nullable=False)
     exact_version = Column(String(255), index=True)
     created_at = Column(DateTime, default=datetime.now)
     repository_moment = Column(postgresql.UUID, ForeignKey('gs_repo.id'))
     is_dev_dep = Column(Boolean, default=False)
     lang = Column(String(32), index=True)
+
+
+"""
+Migrations
+"""
+# alter table gs_deps add column patch_ver integer not null default 0;

@@ -35,14 +35,17 @@ def parse_js_dep(key, value):
     except ValueError:
         major = 0
         minor = 0
+        patch = 0
     else:
         major = sv['major']
         minor = sv['minor']
+        patch = sv['patch']
     return {
         'dep_name': key,
         'exact_version': value,
         'major_ver': major,
         'minor_ver': minor,
+        'patch_ver': patch
     }
 
 
