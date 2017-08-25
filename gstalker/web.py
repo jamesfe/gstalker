@@ -8,7 +8,10 @@ import coloredlogs
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 from tornado.web import Application
+from sqlalchemy.orm import sessionmaker, scoped_session
 
+from gstalker.database import engine
+from gstalker.utils import load_config
 from gstalker.handlers import (
     MainHandler,
 )
@@ -19,12 +22,18 @@ coloredlogs.install(format='%(asctime)s - %(levelname)s: %(message)s', level='DE
 
 class GStalkerServer(Application):
 
-    def __init__(self, ioloop=None):
+    def __init__(self, ioloop=None, config_path=None):
         urls = [
             (r'/', MainHandler),
         ]
         self.log = logger
+        if config_path is None:
+            self.config_path = './config/config.json'
+        else:
+            self.config_path = config_path
+        self.config = load_config(self.config_path)
 
+        self.db = scoped_session(sessionmaker(bind=engine(self.config['db'])))
         super(GStalkerServer, self).__init__(urls, debug=True, autoreload=False)
 
 
