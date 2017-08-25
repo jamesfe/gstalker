@@ -14,6 +14,7 @@ from gstalker.database import engine
 from gstalker.utils import load_config
 from gstalker.handlers import (
     MainHandler,
+    RecalculateFromExactHandler
 )
 
 logger = logging.getLogger('gstalker_server')
@@ -25,6 +26,7 @@ class GStalkerServer(Application):
     def __init__(self, ioloop=None, config_path=None):
         urls = [
             (r'/', MainHandler),
+            (r'/chores/update_js_versions', RecalculateFromExactHandler)
         ]
         self.log = logger
         if config_path is None:
