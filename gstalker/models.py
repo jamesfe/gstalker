@@ -35,10 +35,15 @@ class Dependency(BASE):
     __tablename__ = 'gs_deps'
     id = Column(postgresql.UUID, default=generate_uuid, primary_key=True, unique=True)
     dep_name = Column(String(255), index=True)
-    major_ver = Column(Integer, nullable=False)
-    minor_ver = Column(Integer, nullable=False)
-    patch_ver = Column(Integer, nullable=False)
+    min_major_ver = Column(Integer, nullable=False)
+    min_minor_ver = Column(Integer, nullable=False)
+    min_patch_ver = Column(Integer, nullable=False)
     exact_version = Column(String(255), index=True)
+    min_major_ver = Column(Integer, nullable=False)
+    min_minor_ver = Column(Integer, nullable=False)
+    min_patch_ver = Column(Integer, nullable=False)
+    max_inclusive = Column(Boolean, default=False)
+    no_max = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
     repository_moment = Column(postgresql.UUID, ForeignKey('gs_repo.id'))
     is_dev_dep = Column(Boolean, default=False)
@@ -49,3 +54,5 @@ class Dependency(BASE):
 Migrations
 """
 # alter table gs_deps add column patch_ver integer not null default 0;
+
+# We need to add a max qualifier, so here are some new columns
