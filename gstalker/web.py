@@ -28,7 +28,7 @@ class GStalkerServer(Application):
     def __init__(self, ioloop=None, config_path=None):
         urls = [
             (r'/', MainHandler),
-            (r'/packages/(?P<package_name>{})'.format(PACKAGE_PATTERN), PackageHandler),
+            (r'/packages/(?P<package_query>{})'.format(PACKAGE_PATTERN), PackageHandler),
             (r'/chores/update_js_versions', RecalculateFromExactHandler)
         ]
         self.log = logger
