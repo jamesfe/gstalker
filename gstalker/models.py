@@ -49,6 +49,14 @@ class Dependency(BASE):
     is_dev_dep = Column(Boolean, default=False)
     lang = Column(String(32), index=True)
 
+    def serialize(self):
+        ret_val = {
+            'dep_name': self.dep_name,
+            'exact_version': self.exact_version,
+            'language': self.lang
+        }
+        return ret_val
+
 
 """
 Migrations
