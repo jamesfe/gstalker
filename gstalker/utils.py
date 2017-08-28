@@ -43,9 +43,9 @@ def parse_js_dep(key, value):
     return {
         'dep_name': key,
         'exact_version': value,
-        'major_ver': major,
-        'minor_ver': minor,
-        'patch_ver': patch
+        'min_major_ver': major,
+        'min_minor_ver': minor,
+        'min_patch_ver': patch
     }
 
 

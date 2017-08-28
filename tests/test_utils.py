@@ -50,19 +50,19 @@ class TestParseJSDeps(unittest.TestCase):
         crazy_values = ['blah', '123blah', 'blah-123', 'http://blah.com', 'http://github.com/blah/blah']
         for item in crazy_values:
             res = parse_js_dep('', item)
-            self.assertEqual(res['major_ver'], 0)
-            self.assertEqual(res['minor_ver'], 0)
+            self.assertEqual(res['min_major_ver'], 0)
+            self.assertEqual(res['min_minor_ver'], 0)
             self.assertEqual(res['exact_version'], item)
 
     def test_expected_values_are_returned(self):
         value_map = {
-            '1.2.2': {'major_ver': 1,
-                      'minor_ver': 2},
-            '2.3.4': {'major_ver': 2,
-                      'minor_ver': 3}
+            '1.2.2': {'min_major_ver': 1,
+                      'min_minor_ver': 2},
+            '2.3.4': {'min_major_ver': 2,
+                      'min_minor_ver': 3}
         }
 
         for k, v in value_map.items():
             res = parse_js_dep('', k)
-            self.assertEqual(res['major_ver'], v['major_ver'])
-            self.assertEqual(res['minor_ver'], v['minor_ver'])
+            self.assertEqual(res['min_major_ver'], v['min_major_ver'])
+            self.assertEqual(res['min_minor_ver'], v['min_minor_ver'])
