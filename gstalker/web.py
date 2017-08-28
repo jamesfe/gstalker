@@ -14,7 +14,7 @@ from gstalker.database import engine
 from gstalker.utils import load_config
 from gstalker.handlers import (
     MainHandler,
-    PackageHandler
+    PackageHandler,
     RecalculateFromExactHandler
 )
 
