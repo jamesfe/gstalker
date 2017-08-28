@@ -39,9 +39,9 @@ class Dependency(BASE):
     min_minor_ver = Column(Integer, nullable=False)
     min_patch_ver = Column(Integer, nullable=False)
     exact_version = Column(String(255), index=True)
-    min_major_ver = Column(Integer, nullable=False)
-    min_minor_ver = Column(Integer, nullable=False)
-    min_patch_ver = Column(Integer, nullable=False)
+    max_major_ver = Column(Integer, nullable=False)
+    max_minor_ver = Column(Integer, nullable=False)
+    max_patch_ver = Column(Integer, nullable=False)
     max_inclusive = Column(Boolean, default=False)
     no_max = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.now)
@@ -64,3 +64,16 @@ Migrations
 # alter table gs_deps add column patch_ver integer not null default 0;
 
 # We need to add a max qualifier, so here are some new columns
+"""
+alter table gs_deps rename column minor_ver to min_minor_ver;
+alter table gs_deps rename column major_ver to min_major_ver;
+alter table gs_deps rename patch_ver to min_patch_ver;
+
+alter table gs_deps add column max_patch_ver integer not null default 0;
+alter table gs_deps add column max_minor_ver integer not null default 0;
+alter table gs_deps add column max_major_ver integer not null default 0;
+
+alter table gs_deps add column no_max boolean not null default false;
+alter table gs_deps add column max_inclusive boolean not null default false;
+
+"""
