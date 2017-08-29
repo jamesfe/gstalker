@@ -29,7 +29,7 @@ class GStalkerServer(Application):
         urls = [
             (r'/', MainHandler),
             (r'/packages/(?P<package_query>{})'.format(PACKAGE_PATTERN), PackageHandler),
-            (r'/chores/update_js_versions', RecalculateFromExactHandler)
+            (r'/chores/versions/js', RecalculateFromExactHandler)
         ]
         self.log = logger
         if config_path is None:

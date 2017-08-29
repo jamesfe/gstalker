@@ -66,3 +66,18 @@ class TestParseJSDeps(unittest.TestCase):
             res = parse_js_dep('', k)
             self.assertEqual(res['min_major_ver'], v['min_major_ver'])
             self.assertEqual(res['min_minor_ver'], v['min_minor_ver'])
+
+    def test_less_and_greater_are_found(self):
+        pass
+
+    def test_exact_version_match(self):
+        pass
+
+    def test_greater_version_match(self):
+        pass
+
+    def test_approximate_version_match(self):
+        pass
+
+    def test_latest_is_ignored(self):
+        pass
