@@ -11,3 +11,20 @@ source ./localenv/bin/activate
 make run
 ```
 
+Config File:
+
+```
+{
+    "github_api": {
+        "pass": "password",
+        "user": "github username"
+    },
+    "db": {
+        "host": "127.0.0.1",
+        "name": "database name",
+        "password": "password here",
+        "port": 5432,
+        "user": "username"
+    }
+}
+```
